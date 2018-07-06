@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 	<meta charset="UTF-8">
-	<title>Document</title>
+	<title>Elie is the best</title>
 	<script src="src/phaser.js"></script>
 </head>
 <body>
@@ -23,17 +23,20 @@
 				key : 'main',
 				preload: preload,
 				create: create,
-				update: update
+				update: update,
+				coffres: coffres
 			}
 		}
 		var game = new Phaser.Game( config );
 		var map;
 		var player;
 		var cursors;
-		var groundLayer, coinLayer;
+		var groundLayer, coinLayer, chestLayer;
 		var text;
 		var score = 0;
 		var text;
+		
+
 		/**
 		 * [preload: This function is used to load the assets for our game]
 		 * @return {[void]} [Returns void]
@@ -47,6 +50,8 @@
 			this.load.image('coin', 'assets/coinGold.png');
 			//player animations
 			this.load.atlas('player', 'assets/player.png', 'assets/player.json');
+
+			this.load.image('coffres','assets/coffres.png');
 		}
 		/**
 		 * [create: places assets on the screen]
@@ -58,10 +63,24 @@
 				map = this.make.tilemap({key: 'map'});
 				//tiles for the ground layer
 				var groundTiles = map.addTilesetImage('tiles');
+
+				
 				//create the ground layer
 				groundLayer = map.createDynamicLayer('World', groundTiles, 0, 0);
 				//The player will collide with this layer
 				groundLayer.setCollisionByExclusion([-1]);
+
+				var chestTiles = map.addTilesetImage('coffres');
+
+				
+				//create the ground layer
+				chestLayer = map.createDynamicLayer('Chests', chestTiles, 0, 0);
+				//The player will collide with this layer
+				chestLayer.setCollisionByExclusion([-1]);
+
+
+				
+
 				//set the boundaries of our game world
 				this.physics.world.bounds.width 	= groundLayer.width;
 				this.physics.world.bounds.height 	= groundLayer.height;
@@ -77,9 +96,10 @@
 				//set bounds so the camera won't go outside the game world
 				this.cameras.main.setBounds(0, 0, map.widthInPixels, map.heightInPixels );
 				//make the camera follow the player
+				//this.cameras.main.startFollow(player);
 				this.cameras.main.startFollow(player);
 				//set background color, so the sky is not black
-				this.cameras.main.setBackgroundColor('#ccccff');
+				this.cameras.main.setBackgroundColor('#8B0000');
 			//ANIMATION
 			
 				this.anims.create({
@@ -105,12 +125,16 @@
 				this.physics.add.collider(groundLayer, player);
 				//Collision between coin and player
 				this.physics.add.overlap(player, coinLayer);
+
+				this.physics.add.overlap(player, coffres);
+
+				this.physics.add.collider(coffres,groundTiles);
 			
 			//SCORE UI
 				
 				text = this.add.text(20, 570, '0', {
 					fontSize : '20px',
-					fill: '#ffffff'
+					fill: '#B22222'
 				});
 				text.setScrollFactor(0);
 		}
@@ -145,6 +169,20 @@
 
 					player.body.setVelocityX(0);
 				}
+
+		}
+
+		function coffres(coffres, player){
+			
+
+		this.anims.create({
+					key : "c",
+					frames : this.anims.generateFrameNumbers('coffres',{start:0,end:11}),
+					frameRate : 10,
+					repeat : -1
+				});
+
+
 		}
 		/**
 		 * [collectCoin runs when player touches a coin. It removes sprite and adds to score
